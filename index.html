@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Intensity Gym Timer</title>
+  
+  <!-- Web App Meta Tags to force standalone full-screen when launched from home screen -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <style>
     :root {
       --bg-dark: #121214;
@@ -33,20 +39,43 @@
     }
 
     header {
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
-    header h1 {
+    .header-text h1 {
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.025em;
     }
 
-    header p {
+    .header-text p {
       color: var(--text-muted);
       font-size: 0.85rem;
       margin-top: 4px;
+    }
+
+    /* Small subtle button to trigger immersive full-screen */
+    .fullscreen-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .fullscreen-btn:active {
+      background-color: var(--border);
+      color: var(--text-main);
     }
 
     /* Layout grid: stacks on mobile, split-screen on desktop */
@@ -249,8 +278,14 @@
 <body>
 
   <header>
-    <h1>Intensity</h1>
-    <p>2 Sets to Failure • 3 Min Rest</p>
+    <div class="header-text">
+      <h1>Intensity</h1>
+      <p>2 Sets to Failure • 3 Min Rest</p>
+    </div>
+    <!-- Simple button to request immersive fullscreen on click -->
+    <button class="fullscreen-btn" onclick="toggleFullscreen()" id="fsBtn">
+      ⛶ Fullscreen
+    </button>
   </header>
 
   <main class="app-container">
@@ -372,6 +407,30 @@
     const digits = document.getElementById('digits');
     const statusText = document.getElementById('status');
     const timerBox = document.getElementById('timerBox');
+    const fsBtn = document.getElementById('fsBtn');
+
+    // Immersive fullscreen function
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+          .then(() => {
+            fsBtn.textContent = 'Collapse';
+          })
+          .catch(err => {
+            console.warn(`Could not enable fullscreen: ${err.message}`);
+          });
+      } else {
+        document.exitFullscreen();
+        fsBtn.textContent = '⛶ Fullscreen';
+      }
+    }
+
+    // Monitor back button / swipe gestures that exit full screen automatically
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fsBtn.textContent = '⛶ Fullscreen';
+      }
+    });
 
     // Selects / Highlights the active exercise card
     function selectExercise(card) {
